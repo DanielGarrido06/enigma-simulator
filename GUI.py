@@ -37,7 +37,8 @@ class InputDialog(simpledialog.Dialog):
         # Override this method to remove the default "OK" and "Cancel" buttons
         pass
 
-    def parse_string(self, input_str):
+    @staticmethod
+    def parse_string(input_str):
         if not input_str:
             return None
     
@@ -59,7 +60,6 @@ class InputDialog(simpledialog.Dialog):
         swap_array = self.parse_string(swap_array_input)
 
         e = m.Enigma(key, swap_array, rotor_oder_array)
-        e.set_rotor_position(key)
         cipher_text = e.encipher(message)
         self.set_output_text(cipher_text)
 
