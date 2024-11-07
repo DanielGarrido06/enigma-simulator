@@ -12,26 +12,30 @@ from tkinter import simpledialog
 
 class InputDialog(simpledialog.Dialog):
     def body(self, master):
-        tk.Label(master, text="Enter message to encrypt:").grid(row=0)
-        tk.Label(master, text="Enter rotor position (e.g., 'AAA'):").grid(row=1)
-        tk.Label(master, text="Enter plugboard swaps (space-separated, commas between pairs e.g., 'A,Z B,C'):").grid(row=2)
-        tk.Label(master, text="Enter rotor order (comma-separated, e.g., 'I,II,III'):").grid(row=3)
-        tk.Label(master, text="Output ciphered text:").grid(row=4)
-
-        self.message_entry = tk.Entry(master)
+        tk.Label(master, text="Enter rotor position (e.g., 'AAA'):").grid(row=0)
+        tk.Label(master, text="Enter plugboard swaps (space-separated, commas between pairs e.g., 'A,Z B,C'):").grid(row=1)
+        tk.Label(master, text="Enter rotor order (comma-separated, e.g., 'I,II,III'):").grid(row=2)
+        tk.Label(master, text="").grid(row=3)  # Add a blank row
+        tk.Label(master, text="Enter message to encrypt:").grid(row=4)
+        
         self.key_entry = tk.Entry(master)
         self.swap_entry = tk.Entry(master)
         self.rotor_order_entry = tk.Entry(master)
+        self.message_entry = tk.Text(master, height=4, width=50)
+        
+        self.key_entry.grid(row=0, column=1)
+        self.swap_entry.grid(row=1, column=1)
+        self.rotor_order_entry.grid(row=2, column=1)
+        self.message_entry.grid(row=4, column=1)
+        
+        tk.Label(master, text="Output ciphered text:").grid(row=5)
         self.output_text = tk.Text(master, height=4, width=50, state='disabled')
+        self.output_text.grid(row=5, column=1)
 
-        self.message_entry.grid(row=0, column=1)
-        self.key_entry.grid(row=1, column=1)
-        self.swap_entry.grid(row=2, column=1)
-        self.rotor_order_entry.grid(row=3, column=1)
-        self.output_text.grid(row=4, column=1)
+        tk.Label(master, text="").grid(row=6)  # Add a blank row
 
         self.encrypt_button = tk.Button(master, text="Encrypt", command=self.encrypt_message)
-        self.encrypt_button.grid(row=5, columnspan=2)
+        self.encrypt_button.grid(row=7, columnspan=2)
 
     def buttonbox(self):
         # Override this method to remove the default "OK" and "Cancel" buttons
@@ -53,7 +57,7 @@ class InputDialog(simpledialog.Dialog):
         self.output_text.config(state='disabled')
 
     def encrypt_message(self):
-        message = self.message_entry.get()
+        message = self.message_entry.get("1.0", tk.END).strip()
         key = self.key_entry.get()
         swap_array_input = self.swap_entry.get()
         rotor_oder_array = self.rotor_order_entry.get().split(',')
