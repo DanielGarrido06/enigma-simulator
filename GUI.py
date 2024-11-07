@@ -5,12 +5,14 @@ allows you to input a message, key, swaps, and rotor order to encrypt a message,
 or decrypt it if you have the parameters set correctly.
 '''
 
-
 import machine as m
 import tkinter as tk
 from tkinter import simpledialog
+import unicodedata
+import re
 
 class InputDialog(simpledialog.Dialog):
+
     def body(self, master):
         tk.Label(master, text="Enter rotor position (e.g., 'AAA'):").grid(row=0)
         tk.Label(master, text="Enter plugboard swaps (space-separated, commas between pairs e.g., 'A,Z B,C'):").grid(row=1)
@@ -56,8 +58,17 @@ class InputDialog(simpledialog.Dialog):
         self.output_text.insert(tk.END, text)
         self.output_text.config(state='disabled')
 
+    def remove_special_characters(self,text):
+        # Normalize the text to decompose special characters
+        normalized_text = unicodedata.normalize('NFD', text)
+        # Remove diacritics (accents) and special characters
+        cleaned_text = ''.join(c for c in normalized_text if unicodedata.category(c) != 'Mn')
+        # Remove any remaining non-alphanumeric characters
+        cleaned_text = re.sub(r'[^A-Za-z0-9 ]+', '', cleaned_text)
+        return cleaned_text    
+
     def encrypt_message(self):
-        message = self.message_entry.get("1.0", tk.END).strip()
+        message = self.remove_special_characters(self.message_entry.get("1.0", tk.END).strip())
         key = self.key_entry.get()
         swap_array_input = self.swap_entry.get()
         rotor_oder_array = self.rotor_order_entry.get().split(',')
@@ -67,7 +78,9 @@ class InputDialog(simpledialog.Dialog):
         cipher_text = e.encipher(message)
         self.set_output_text(cipher_text)
 
+
+
 root = tk.Tk()
 root.withdraw()  # Hide the root window
 
-dialog = InputDialog(root)
+dialog = InputDialog(root, title="Enigma Machine Simulator")
