@@ -10,14 +10,6 @@ import machine as m
 import tkinter as tk
 from tkinter import simpledialog
 
-def parse_string(input_str):
-    if not input_str:
-        return None
-    
-    pairs = input_str.split()
-    result = [tuple(pair.split(',')) for pair in pairs]
-    return result
-
 class InputDialog(simpledialog.Dialog):
     def body(self, master):
         tk.Label(master, text="Enter message to encrypt:").grid(row=0)
@@ -45,6 +37,14 @@ class InputDialog(simpledialog.Dialog):
         # Override this method to remove the default "OK" and "Cancel" buttons
         pass
 
+    def parse_string(self, input_str):
+        if not input_str:
+            return None
+    
+        pairs = input_str.split()
+        result = [tuple(pair.split(',')) for pair in pairs]
+        return result
+
     def set_output_text(self, text):
         self.output_text.config(state='normal')
         self.output_text.delete(1.0, tk.END)
@@ -56,7 +56,7 @@ class InputDialog(simpledialog.Dialog):
         key = self.key_entry.get()
         swap_array_input = self.swap_entry.get()
         rotor_oder_array = self.rotor_order_entry.get().split(',')
-        swap_array = parse_string(swap_array_input)
+        swap_array = self.parse_string(swap_array_input)
 
         e = m.Enigma(key, swap_array, rotor_oder_array)
         e.set_rotor_position(key)
