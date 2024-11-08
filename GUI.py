@@ -13,6 +13,8 @@ import re
 
 class InputDialog(simpledialog.Dialog):
 
+    output_cyphered_text = ""
+
     def body(self, master):
         tk.Label(master, text="Enter rotor position (e.g., 'AAA'):").grid(row=0)
         tk.Label(master, text="Enter plugboard swaps (space-separated, commas between pairs e.g., 'A,Z B,C'):").grid(row=1)
@@ -38,6 +40,8 @@ class InputDialog(simpledialog.Dialog):
 
         self.encrypt_button = tk.Button(master, text="Encrypt", command=self.encrypt_message)
         self.encrypt_button.grid(row=7, columnspan=2)
+
+        self.message_entry.bind('<KeyRelease>', self.live_encrypt_message)
 
     def buttonbox(self):
         # Override this method to remove the default "OK" and "Cancel" buttons
@@ -77,6 +81,26 @@ class InputDialog(simpledialog.Dialog):
         e = m.Enigma(key, swap_array, rotor_oder_array)
         cipher_text = e.encipher(message)
         self.set_output_text(cipher_text)
+
+    #This just doesn't work
+    #TODO: Fix it lol
+    def live_encrypt_message(self, event):
+        message = self.remove_special_characters(self.message_entry.get("1.0", tk.END).strip())
+        key = self.key_entry.get()
+        swap_array_input = self.swap_entry.get()
+        rotor_oder_array = self.rotor_order_entry.get().split(',')
+        swap_array = self.parse_string(swap_array_input)
+
+        e = m.Enigma(key, swap_array, rotor_oder_array)
+        cipher_letter = e.encode_decode_letter(message[-1])
+        output_cyphered_text = self.message_entry.get("1.0", tk.END).strip()
+        output_cyphered_text += cipher_letter
+        self.set_output_text(output_cyphered_text)
+
+        # Update the rotor position box
+        new_key = e.l_rotor.window + e.m_rotor.window + e.r_rotor.window
+        self.key_entry.delete(0, tk.END)
+        self.key_entry.insert(0, new_key)
 
 
 
