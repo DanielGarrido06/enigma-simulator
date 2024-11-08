@@ -13,33 +13,34 @@ import re
 
 class InputDialog(simpledialog.Dialog):
 
-    output_cyphered_text = ""
-
     def body(self, master):
-        tk.Label(master, text="Enter rotor position (e.g., 'AAA'):").grid(row=0)
-        tk.Label(master, text="Enter plugboard swaps (space-separated, commas between pairs e.g., 'A,Z B,C'):").grid(row=1)
-        tk.Label(master, text="Enter rotor order (comma-separated, e.g., 'I,II,III'):").grid(row=2)
-        tk.Label(master, text="").grid(row=3)  # Add a blank row
-        tk.Label(master, text="Enter message to encrypt:").grid(row=4)
+        tk.Label(master, text="Starting rotor position (e.g., 'AAA'):").grid(row=0)
+        tk.Label(master, text="Current rotor position:").grid(row=1)
+        tk.Label(master, text="Enter plugboard swaps (space-separated, commas between pairs e.g., 'A,Z B,C'):").grid(row=2)
+        tk.Label(master, text="Enter rotor order (comma-separated, e.g., 'I,II,III'):").grid(row=3)
+        tk.Label(master, text="").grid(row=4)  # Add a blank row
+        tk.Label(master, text="Enter message to encrypt:").grid(row=5)
         
         self.key_entry = tk.Entry(master)
+        self.current_key = tk.Entry(master)
         self.swap_entry = tk.Entry(master)
         self.rotor_order_entry = tk.Entry(master)
         self.message_entry = tk.Text(master, height=4, width=50)
         
         self.key_entry.grid(row=0, column=1)
-        self.swap_entry.grid(row=1, column=1)
-        self.rotor_order_entry.grid(row=2, column=1)
-        self.message_entry.grid(row=4, column=1)
+        self.current_key.grid(row=1, column=1)
+        self.swap_entry.grid(row=2, column=1)
+        self.rotor_order_entry.grid(row=3, column=1)
+        self.message_entry.grid(row=5, column=1)
         
-        tk.Label(master, text="Output ciphered text:").grid(row=5)
+        tk.Label(master, text="Output ciphered text:").grid(row=6)
         self.output_text = tk.Text(master, height=4, width=50, state='disabled')
-        self.output_text.grid(row=5, column=1)
+        self.output_text.grid(row=6, column=1)
 
-        tk.Label(master, text="").grid(row=6)  # Add a blank row
+        tk.Label(master, text="").grid(row=7)  # Add a blank row
 
         self.encrypt_button = tk.Button(master, text="Encrypt", command=self.encrypt_message)
-        self.encrypt_button.grid(row=7, columnspan=2)
+        self.encrypt_button.grid(row=8, columnspan=2)
 
         self.message_entry.bind('<KeyRelease>', self.live_encrypt_message)
 
@@ -82,9 +83,13 @@ class InputDialog(simpledialog.Dialog):
         cipher_text = e.encipher(message)
         self.set_output_text(cipher_text)
 
-    #This just doesn't work
-    #TODO: Fix it lol
+
     def live_encrypt_message(self, event):
+
+        # Ignore non-alphabetic characters
+        if not event.char.isalpha():
+            return
+        
         message = self.remove_special_characters(self.message_entry.get("1.0", tk.END).strip())
         key = self.key_entry.get()
         swap_array_input = self.swap_entry.get()
@@ -92,15 +97,13 @@ class InputDialog(simpledialog.Dialog):
         swap_array = self.parse_string(swap_array_input)
 
         e = m.Enigma(key, swap_array, rotor_oder_array)
-        cipher_letter = e.encode_decode_letter(message[-1])
-        output_cyphered_text = self.message_entry.get("1.0", tk.END).strip()
-        output_cyphered_text += cipher_letter
-        self.set_output_text(output_cyphered_text)
+        updated_output = e.encipher(message)
+        self.set_output_text(updated_output)
 
         # Update the rotor position box
         new_key = e.l_rotor.window + e.m_rotor.window + e.r_rotor.window
-        self.key_entry.delete(0, tk.END)
-        self.key_entry.insert(0, new_key)
+        self.current_key.delete(0, tk.END)
+        self.current_key.insert(0, new_key)
 
 
 
